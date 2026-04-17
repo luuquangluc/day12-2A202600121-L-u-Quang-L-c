@@ -4,7 +4,7 @@ Production Readiness Checker
 Tự động kiểm tra project có đủ điều kiện deploy chưa.
 Chạy: python check_production_ready.py
 
-Output: checklist với ✅ / ❌ cho từng item.
+Output: checklist với [OK] / [FAIL] cho từng item.
 """
 import os
 import sys
@@ -13,8 +13,8 @@ import subprocess
 
 
 def check(name: str, passed: bool, detail: str = "") -> dict:
-    icon = "✅" if passed else "❌"
-    print(f"  {icon} {name}" + (f" — {detail}" if detail else ""))
+    icon = "[OK]" if passed else "[FAIL]"
+    print(f"  {icon} {name}" + (f" - {detail}" if detail else ""))
     return {"name": name, "passed": passed}
 
 
@@ -27,7 +27,7 @@ def run_checks():
     print("=" * 55)
 
     # ── Files ──────────────────���───────────────────
-    print("\n📁 Required Files")
+    print("\n[Files] Required Files")
     results.append(check("Dockerfile exists",
                          os.path.exists(os.path.join(base, "Dockerfile"))))
     results.append(check("docker-compose.yml exists",
@@ -42,8 +42,8 @@ def run_checks():
                          os.path.exists(os.path.join(base, "railway.toml")) or
                          os.path.exists(os.path.join(base, "render.yaml"))))
 
-    # ── Security ──────────────────────────────────���
-    print("\n🔒 Security")
+    # ── Security ──────────────────────────────────
+    print("\n[Security] Security")
 
     # Check .env not tracked
     env_file = os.path.join(base, ".env")
@@ -53,7 +53,7 @@ def run_checks():
     env_ignored = False
     for gi in [gitignore, root_gitignore]:
         if os.path.exists(gi):
-            content = open(gi).read()
+            content = open(gi, encoding="utf-8").read()
             if ".env" in content:
                 env_ignored = True
                 break
@@ -66,7 +66,7 @@ def run_checks():
     for f in ["app/main.py", "app/config.py"]:
         fpath = os.path.join(base, f)
         if os.path.exists(fpath):
-            content = open(fpath).read()
+            content = open(fpath, encoding="utf-8").read()
             for bad in ["sk-", "password123", "hardcoded"]:
                 if bad in content:
                     secrets_found.append(f"{f}:{bad}")
@@ -74,11 +74,11 @@ def run_checks():
                          len(secrets_found) == 0,
                          str(secrets_found) if secrets_found else ""))
 
-    # ── API Endpoints ────────────────────────────��─
-    print("\n🌐 API Endpoints (code check)")
+    # ── API Endpoints ─────────────────────────────
+    print("\n[API] API Endpoints (code check)")
     main_py = os.path.join(base, "app", "main.py")
     if os.path.exists(main_py):
-        content = open(main_py).read()
+        content = open(main_py, encoding="utf-8").read()
         results.append(check("/health endpoint defined",
                              '"/health"' in content or "'/health'" in content))
         results.append(check("/ready endpoint defined",
@@ -95,10 +95,10 @@ def run_checks():
         results.append(check("app/main.py exists", False, "Create app/main.py!"))
 
     # ── Docker ─────────────────────────────────────
-    print("\n🐳 Docker")
+    print("\n[Docker] Docker")
     dockerfile = os.path.join(base, "Dockerfile")
     if os.path.exists(dockerfile):
-        content = open(dockerfile).read()
+        content = open(dockerfile, encoding="utf-8").read()
         results.append(check("Multi-stage build",
                              "AS builder" in content or "AS runtime" in content))
         results.append(check("Non-root user",
@@ -110,13 +110,13 @@ def run_checks():
 
     dockerignore = os.path.join(base, ".dockerignore")
     if os.path.exists(dockerignore):
-        content = open(dockerignore).read()
+        content = open(dockerignore, encoding="utf-8").read()
         results.append(check(".dockerignore covers .env",
                              ".env" in content))
         results.append(check(".dockerignore covers __pycache__",
                              "__pycache__" in content))
 
-    # ── Summary ───────────────────────────────────���
+    # ── Summary ───────────────────────────────────
     passed = sum(1 for r in results if r["passed"])
     total = len(results)
     pct = round(passed / total * 100)
@@ -125,13 +125,13 @@ def run_checks():
     print(f"  Result: {passed}/{total} checks passed ({pct}%)")
 
     if pct == 100:
-        print("  🎉 PRODUCTION READY! Deploy nào!")
+        print("  Done! PRODUCTION READY! Deploy nào!")
     elif pct >= 80:
-        print("  ✅ Almost there! Fix the ❌ items above.")
+        print("  Almost there! Fix the [FAIL] items above.")
     elif pct >= 60:
-        print("  ⚠️  Good progress. Several items need attention.")
+        print("  Good progress. Several items need attention.")
     else:
-        print("  ❌ Not ready. Review the checklist carefully.")
+        print("  Not ready. Review the checklist carefully.")
 
     print("=" * 55 + "\n")
     return pct == 100
