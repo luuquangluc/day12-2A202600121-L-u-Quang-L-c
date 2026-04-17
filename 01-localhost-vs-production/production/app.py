@@ -23,7 +23,9 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from config import settings
 from utils.mock_llm import ask
-
+from dotenv import load_dotenv  # <--- Thêm dòng này
+# Nạp các biến từ file .env vào môi trường hệ thống
+load_dotenv() # <--- Thêm dòng này
 # ✅ Structured JSON logging — dễ parse trong log aggregator (Datadog, Loki...)
 logging.basicConfig(
     level=logging.DEBUG if settings.debug else logging.INFO,

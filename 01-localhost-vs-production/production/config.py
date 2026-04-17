@@ -9,6 +9,10 @@ Tất cả config đọc từ environment variables.
 import os
 import logging
 from dataclasses import dataclass, field
+from dotenv import load_dotenv
+
+# ✅ Nạp file .env ngay khi module này được load
+load_dotenv()
 
 
 @dataclass

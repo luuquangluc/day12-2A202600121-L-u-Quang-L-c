@@ -175,9 +175,9 @@ cd ../production
 ```
 
 **Nhiệm vụ:** Đọc `Dockerfile` và tìm:
-- Stage 1 làm gì?
-- Stage 2 làm gì?
-- Tại sao image nhỏ hơn?
+- Stage 1 làm gì: Đây là môi trường "Xây dựng". Nó cài đặt đầy đủ các công cụ cần thiết để biên dịch (compile) các thư viện Python, ví dụ như gcc, libpq-dev
+- Stage 2 làm gì: Đây là môi trường "Sản phẩm". Nó chỉ chứa runtime cần thiết (Python + thư viện đã cài). Nó copy kết quả từ Stage 1 sang.
+- Tại sao image nhỏ hơn: Vì Stage 2 không chứa các công cụ build (như gcc) và các file tạm, chỉ chứa runtime cần thiết. Nó sử dụng bản python:3.11-slim nhẹ hơn bản python:3.11 rất
 
 Build và so sánh:
 ```bash
